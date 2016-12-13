@@ -249,9 +249,16 @@ $(function () {
             });
         });
     }
-    function setPageManager(){
+    function setPageManager(def){
+
+        def = def || 'page-home';
+
         var pages = {}, tpls = $('script[type="text/html"]');
         var winH = $(window).height();
+
+        if(tpls.length === 0) {
+            return false;
+        }
 
         for (var i = 0, len = tpls.length; i < len; ++i) {
             var tpl = tpls[i], name = tpl.id.replace(/tpl_/, '');
@@ -261,13 +268,12 @@ $(function () {
                 template: '#' + tpl.id
             };
         }
-        pages.home.url = '#';
+
+        pages[def].url = '#';
 
         for (var page in pages) {
             pageManager.push(pages[page]);
         }
-
-        console.log('============pageManager=============', pageManager);
 
         pageManager
             .setPageAppend(function($html){
@@ -280,7 +286,7 @@ $(function () {
                     $foot.removeClass('j_bottom');
                 }
             })
-            .setDefault('home')
+            .setDefault(def)
             .init();
     }
 
@@ -320,7 +326,7 @@ $(function () {
                 RG = new routerGenerator(this.pages);
 
             setPageManager();
-            location.hash = 'page-home'
+            location.hash = 'page-home';
         }
 
         layoutGenerator.prototype = {
@@ -342,12 +348,10 @@ $(function () {
 
         routerGenerator.prototype = {
             init: function() {
-
                 for (var i = 0; i < this.pages.length; i++) {
                     var currentPage = this.pages[i];
                     this.appendPageToHTML(currentPage);
                 };
-
             },
 
             appendPageToHTML: function(page) {
