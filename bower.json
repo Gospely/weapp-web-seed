@@ -1,0 +1,21 @@
+{
+    "name": "gospel-weapp-web",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/Gospely/weapp-web-seed"
+    },
+    "description": "gospel weapp",
+    "main": "dist/style/weui.css",
+    "version": "1.1.0",
+    "authors": [
+        "wechat ui team"
+    ],
+    "license": "MIT",
+    "keywords": [
+        "wechat",
+        "weixin",
+        "mobile",
+        "ui"
+    ],
+    "ignore": []
+}
