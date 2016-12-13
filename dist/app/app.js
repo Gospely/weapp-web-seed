@@ -318,6 +318,9 @@ $(function () {
 
             var PR = new appRender(this.app),
                 RG = new routerGenerator(this.pages);
+
+            setPageManager();
+            location.hash = 'page-home'
         }
 
         layoutGenerator.prototype = {
@@ -342,7 +345,6 @@ $(function () {
 
                 for (var i = 0; i < this.pages.length; i++) {
                     var currentPage = this.pages[i];
-                    console.log('currentPage', currentPage);
                     this.appendPageToHTML(currentPage);
                 };
 
@@ -352,7 +354,7 @@ $(function () {
                 var wrapper = $(this.generateTplScript(page.key));
                 $('#container').after(wrapper);
                 wrapper.append('<div class="page"></div>')
-                this.generateTpl(page, wrapper);
+                this.generateTpl(page, wrapper.find('.page'));
             },
 
             generateTpl: function(page, target) {
