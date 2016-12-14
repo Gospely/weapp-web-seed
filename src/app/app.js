@@ -306,6 +306,131 @@ $(function () {
 
     var dndHandlder = function() {
 
+        var postMessageToFather = {
+
+            ctrlClicked: function(c) {
+                parent.postMessage({ 'ctrlClicked': c }, "*");
+            },
+
+            ctrlToBeAdded: function(c) {
+                parent.postMessage({ 'ctrlToBeAdded': c }, "*");
+            },
+
+            ctrlUpdated: function(c) {
+                parent.postMessage({ 'ctrlUpdated': c }, "*");
+            },
+
+            ctrlRemoved: function(c) {
+                parent.postMessage({ 'ctrlRemoved': c }, "*");
+            },
+
+            pageSelected: function(c) {
+                parent.postMessage({ 'pageSelected': c }, "*");
+            },
+
+            makeComponentsDraggable: function(c) {
+                parent.postMessage({ 'makeComponentsDraggable': c }, "*");
+            }
+
+        }
+
+        function dndInitialization (options) {
+            var self = this;
+
+            this.rowSelector = options.rowSelector;
+            this.comSelector = options.comSelector;
+            this.containerSelector = options.containerSelector;
+            this.inter = 0;
+
+            this.makeComponentsDraggable();
+
+            this.onDrop();
+
+            this.initEvents({
+                onSourceController: function() {
+                    // self.makeComponentsDraggable();
+                }
+            });
+
+        }
+
+        dndInitialization.prototype = {
+
+            initEvents: function(cbs) {
+
+                var self = this;
+
+                window.addEventListener('message', function(evt) {
+
+                    var data = evt.data,
+
+                        evtAction = {
+
+                            componentsDraggable: function() {
+                                console.log('===========================sourceController=========================', self.sourceController);
+                                cbs.onSourceController();
+                            }
+
+                        },
+
+                        eventName = '';
+
+                    for(var key in data) {
+                        eventName = key
+                    }
+
+                    if(evtAction[eventName]) {
+                        data = data[key];
+                        evtAction[eventName]();
+                    }
+
+                });
+
+            },
+
+            makeComponentsDraggable: function(cb) {
+                var self = this;
+
+                postMessageToFather.makeComponentsDraggable({
+                    rowSelector: self.rowSelector
+                })
+            },
+
+            onDrop: function() {
+                var self = this;
+                $(this.containerSelector).on("drop", function(e) {
+                    console.log('onrop=======', e, currentRoute);
+
+                    if(e.originalEvent.dataTransfer.getData("Text") == 'true') {
+                        return false;
+                    }
+
+                    var dropTarget = $(e.target),
+                        currentRouterDom = $('.' + currentRoute);
+
+                    if(!dropTarget.isChildAndSelfOf('.' + currentRoute)) {
+                        parent_window.postMessage({
+                            invalidDropArea: true
+                        }, '*');
+                        return false;
+                    }
+
+                    e.preventDefault(); 
+
+                    //获取父元素的window对象上的数据
+                    var controller = parent.dndData;
+                    parent.currentTarget = e.target;
+                    var ctrlAndTarget = {
+                        ctrl: controller,
+                        target: e.target.id
+                    }
+                    postMessageToFather.ctrlToBeAdded(ctrlAndTarget);
+                    hideDesignerDraggerBorder(dropTarget);
+                });
+            }
+
+        };
+
         function appRender(app) {
             parent.postMessage({
                 appConfigRender: app
@@ -317,7 +442,7 @@ $(function () {
             this.layoutState = data.layoutState;
 
             this.app = this.layout[0];
-            this.pages = app.children;
+            this.pages = this.app.children;
 
             window.wholeAppConfig = this.app.attr;
             window.layoutState = this.layoutState;
@@ -681,7 +806,13 @@ $(function () {
 
                         layoutLoaded: function() {
                             console.log('previewer layoutLoaded', data);
-                            var LG = layoutGenerator(data);
+                            var LG = new layoutGenerator(data);
+
+                            var dnd = new dndInitialization({
+                                rowSelector: '#dnd-row',
+                                comSelector: '.app-components',
+                                containerSelector: '.container'
+                            });
                         },
 
                         pageAdded: function() {
