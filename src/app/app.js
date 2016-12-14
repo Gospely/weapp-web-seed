@@ -326,7 +326,6 @@ $(function () {
                 RG = new routerGenerator(this.pages);
 
             setPageManager();
-            location.hash = 'page-home';
         }
 
         layoutGenerator.prototype = {
